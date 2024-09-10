@@ -35,7 +35,7 @@ app.post('/users', async (req, res) => {
         if (!email){
             res.status(404).json("Email cannot be empty");
         } else if (users.includes(email)) {
-            res.status(404).json("Oops, looks like this email is already used");
+            res.status(404).json("Oops, looks like this email is already used!");
         } else if (!email.match(emailRegex)) {
             res.status(404).json("Email must match pattern: example@gmail.com");
         }
