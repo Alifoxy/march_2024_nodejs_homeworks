@@ -5,6 +5,8 @@ import { tokenRepository } from "../repositories/token.repository";
 import { userRepository } from "../repositories/user.repository";
 import { passwordService } from "./password.service";
 import { tokenService } from "./token.service";
+import {EmailTypeEnum} from "../enums/email-type.enum";
+import {emailService} from "./email.service";
 
 class AuthService {
     public async signUp(
@@ -51,7 +53,7 @@ class AuthService {
         payload:ITokenPayload,
         ):Promise<ITokenPair>{
 
-        await tokenRepository.deleteByParams({refreshToken});
+        await tokenRepository.deleteOneByParams({refreshToken});
         const tokens = tokenService.generateTokens({
             userId: payload.userId,
             role: payload.role,
@@ -66,6 +68,25 @@ class AuthService {
         if (user) {
             throw new ApiError("Email already exists", 409);
         }
+    }
+
+    public async logout(
+        jwtPayload: ITokenPayload,
+        tokenId: string,
+    ): Promise<void> {
+        const user = await userRepository.getById(jwtPayload.userId);
+        await tokenRepository.deleteOneByParams({ _id: tokenId });
+        await emailService.sendMail(EmailTypeEnum.LOGOUT, "alifoxy666@gmail.com", {
+            name: user.name,
+        });
+    }
+
+    public async logoutAll(jwtPayload: ITokenPayload): Promise<void> {
+        const user = await userRepository.getById(jwtPayload.userId);
+        await tokenRepository.deleteManyByParams({ _userId: jwtPayload.userId });
+        await emailService.sendMail(EmailTypeEnum.LOGOUT, user.email, {
+            name: user.name,
+        });
     }
 }
 
