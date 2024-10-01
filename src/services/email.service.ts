@@ -1,11 +1,12 @@
-import nodemailer, { Transporter } from "nodemailer";
-import hbs from "nodemailer-express-handlebars";
-import path from "path";
+import nodemailer = require ("nodemailer");
+import hbs = require("nodemailer-express-handlebars");
+import path = require("path");
 
 import { configs } from "../config/configs";
 import { emailConstants } from "../constants/email.constants";
 import { EmailTypeEnum } from "../enums/email-type.enum";
 import { EmailTypeToPayload } from "../types/email-type-to-payload.type";
+import {Transporter} from "nodemailer";
 
 class EmailService {
     private transporter: Transporter;
@@ -41,6 +42,7 @@ class EmailService {
     ): Promise<void> {
         const { subject, template } = emailConstants[type];
 
+        context["frontUrl"] = configs.APP_FRONT_URL;
         const options = { to, subject, template, context };
         await this.transporter.sendMail(options);
     }
